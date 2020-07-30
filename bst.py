@@ -156,93 +156,523 @@ class BST:
 
     def contains(self, value: object) -> bool:
         """
-        TODO: Write this implementation
+        Indicates whether value is present in BST
         """
-        return True
+        # iterate through tree in search of value
+        current = self.root
+        while current is not None:
+            if value == current.value:
+                return True
+            elif value < current.value:
+                current = current.left
+            else:
+                current = current.right
+
+        # value was not found, so return False
+        return False
 
     def get_first(self) -> object:
         """
-        TODO: Write this implementation
+        Returns value stored at root node of BST
         """
-        return None
+        # handle case where BST is empty
+        if self.root is None:
+            return None
+
+        # return value property of root node
+        return self.root.value
+
+    def remove(self, value: object) -> bool:
+        """
+        Removes first node with value property matching value argument
+        """
+        # iterate through tree in search of value
+        left_bool = False
+        node_found = False
+        parent = None
+        to_remove = self.root
+        while to_remove is not None and not node_found:
+            if value == to_remove.value:
+                node_found = True
+            elif value < to_remove.value:
+                parent = to_remove
+                to_remove = to_remove.left
+                left_bool = True
+            else:
+                parent = to_remove
+                to_remove = to_remove.right
+                left_bool = False
+
+        # handle case where value was not found in BST
+        if not node_found:
+            return False
+
+        # handle case where node to remove is root
+        if to_remove == self.root:
+            self.remove_first()
+            return True
+
+        # handle case where to_remove is a leaf
+        if self.is_leaf(to_remove) and left_bool:
+            parent.left = None
+            return True
+        if self.is_leaf(to_remove) and not left_bool:
+            parent.right = None
+            return True
+
+        # handle case where to_remove only has left subtree
+        if to_remove.right is None and left_bool:
+            parent.left = to_remove.left
+            return True
+        if to_remove.right is None and not left_bool:
+            parent.right = to_remove.left
+            return True
+
+        # handle case where to_remove has a right subtree
+        # find left-most child from right subtree
+        left_bool_2 = False
+        replace_node = to_remove.right
+        replace_parent = to_remove
+        while replace_node.left is not None:
+            replace_parent = replace_node
+            replace_node = replace_node.left
+            left_bool_2 = True
+
+        # fill open slot from removing new_to_remove
+        if left_bool_2:
+            replace_parent.left = replace_node.right
+        if not left_bool_2:
+            replace_parent.right = replace_node.right
+
+        # insert left-most child from right subtree in open spot
+        if left_bool:
+            parent.left = replace_node
+            replace_node.left = to_remove.left
+            replace_node.right = to_remove.right
+            return True
+        if not left_bool:
+            parent.right = replace_node
+            replace_node.left = to_remove.left
+            replace_node.right = to_remove.right
+            return True
 
     def remove_first(self) -> bool:
         """
-        TODO: Write this implementation
+        Removes root node from BST
         """
-        return True
+        # handle case where BST is empty
+        if self.root is None:
+            return False
 
-    def remove(self, value) -> bool:
-        """
-        TODO: Write this implementation
-        """
+        # handle case where root is a leaf
+        if self.is_leaf(self.root):
+            self.root = None
+            return True
+
+        # handle case where root has NO right subtree
+        if self.root.right is None:
+            self.root = self.root.left
+            return True
+
+        # handle case where root has a right subtree
+        # iterate through right subtree in search of left-most child
+        replace_node = self.root.right
+        replace_parent = self.root
+        left_bool = False
+        while replace_node.left is not None:
+            replace_parent = replace_node
+            replace_node = replace_node.left
+            left_bool = True
+
+        # remove leftmost child (replace_node) from tree
+        if left_bool:
+            replace_parent.left = replace_node.right
+        else:
+            replace_parent.right = replace_node.right
+
+        # insert leftmost child into root position
+        replace_node.left = self.root.left
+        replace_node.right = self.root.right
+        self.root = replace_node
         return True
 
     def pre_order_traversal(self) -> Queue:
         """
-        TODO: Write this implementation
+        Performs pre-order traversal of BST
         """
-        return Queue()
+        # initialize Queue to add TreeNode objects to
+        q = Queue()
+
+        # handle case where BST is empty
+        if self.root is None:
+            return q
+
+        # utilize recursive helper function in processing non-empty BST and return resulting Queue
+        self.pre_order_helper(self.root, q)
+        return q
+
+    def pre_order_helper(self, node: object, q: object) -> None:
+        """
+        Recursive helper function to pre_order_traversal()
+        """
+        # process current node
+        q.enqueue(node)
+
+        # if node.left exists, navigate traversal to node.left
+        if node.left is not None:
+            self.pre_order_helper(node.left, q)
+
+        # if node.right exists, navigate traversal to node.right
+        if node.right is not None:
+            self.pre_order_helper(node.right, q)
 
     def in_order_traversal(self) -> Queue:
         """
-        TODO: Write this implementation
+        Performs in-order traversal of BST
         """
-        return Queue()
+        # initialize Queue to add TreeNode objects to
+        q = Queue()
+
+        # handle case where BST is empty
+        if self.root is None:
+            return q
+
+        # utilize recursive helper function in processing non-empty BST and return resulting Queue
+        self.in_order_helper(self.root, q)
+        return q
+
+    def in_order_helper(self, node: object, q: object) -> None:
+        """
+        Recursive helper function to in_order_traversal()
+        """
+        # if node.left exists, navigate traversal to node.left then process current node
+        if node.left is not None:
+            self.in_order_helper(node.left, q)
+
+        # process current node
+        q.enqueue(node)
+
+        # if node.right exists, navigate traversal to node.right
+        if node.right is not None:
+            self.in_order_helper(node.right, q)
 
     def post_order_traversal(self) -> Queue:
         """
-        TODO: Write this implementation
+        Performs post-order traversal of BST
         """
-        return Queue()
+        # initialize Queue to add TreeNode objects to
+        q = Queue()
+
+        # handle case where BST is empty
+        if self.root is None:
+            return q
+
+        # utilize recursive helper function in processing non-empty BST and return resulting Queue
+        self.post_order_helper(self.root, q)
+        return q
+
+    def post_order_helper(self, node: object, q: object) -> None:
+        """
+        Recursive helper function to post_order_traversal()
+        """
+        # if node.left exists, navigate traversal to node.left then process current node
+        if node.left is not None:
+            self.post_order_helper(node.left, q)
+
+        # if node.right exists, navigate traversal to node.right
+        if node.right is not None:
+            self.post_order_helper(node.right, q)
+
+        # process current node
+        q.enqueue(node)
 
     def by_level_traversal(self) -> Queue:
         """
-        TODO: Write this implementation
+        Performs by-level traversal of BST
         """
-        return Queue()
+        # initialize Queue objects to help with processing BST
+        working_q = Queue()
+        final_q = Queue()
+
+        # handle case where BST is empty
+        if self.root is None:
+            return final_q
+
+        # start process by placing BST.root in working_q
+        working_q.enqueue(self.root)
+
+        # iterate through BST laterally, adding TreeNode's to working_q for processing
+        while not working_q.is_empty():
+            working_node = working_q.dequeue()
+            if working_node is not None:
+                final_q.enqueue(working_node)
+                working_q.enqueue(working_node.left)
+                working_q.enqueue(working_node.right)
+
+        return final_q
 
     def is_full(self) -> bool:
         """
-        TODO: Write this implementation
+        Indicates whether BST is full
         """
-        return True
+        # handle case where BST is empty
+        if self.root is None:
+            return True
+
+        # handle case where BST has single root node
+        if self.root.left is None and self.root.right is None:
+            return True
+
+        # call recursive helper function
+        return self.is_full_helper(self.root)
+
+    def is_full_helper(self, node: object) -> bool:
+        """
+        Recursive helper function for is_full()
+        """
+        # handle base case where node is a leaf
+        if self.is_leaf(node):
+            return True
+
+        # handle base case where node has single child
+        if node.left is None and node.right is not None:
+            return False
+        if node.left is not None and node.right is None:
+            return False
+
+        # handle recursive case where node has two children
+        return True and self.is_full_helper(node.left) and self.is_full_helper(node.right)
 
     def is_complete(self) -> bool:
         """
-        TODO: Write this implementation
+        Determines whether BST is complete
         """
+        # handle case where BST is empty
+        if self.root is None:
+            return True
+
+        # handle case where BST is perfect
+        if self.is_perfect():
+            return True
+
+        # start process by placing BST.root in q for processing
+        q = Queue()
+        q.enqueue(self.root)
+
+        # iterate through BST laterally, adding TreeNode's to q for processing
+        need_leaves = False
+        while not q.is_empty():
+            node = q.dequeue()
+
+            # handle cases where we do not need all leaves
+            if not need_leaves:
+                # handle case where node.left is None but working_node.right is populated
+                if node.left is None and node.right is not None:
+                    return False
+
+                # handle case where node is a leaf
+                elif self.is_leaf(node):
+                    need_leaves = True
+
+                # handle case where node.left is populated but working_node.right is None
+                elif node.left is not None and node.right is None:
+                    need_leaves = True
+                    q.enqueue(node.left)
+
+                # handle case where node has two children
+                if not need_leaves and node.left is not None and node.right is not None:
+                    q.enqueue(node.left)
+                    q.enqueue(node.right)
+
+            # handle cases where we need all leaves
+            elif need_leaves:
+                if not self.is_leaf(node):
+                    return False
+
+        # if program makes it this far, BST is complete
         return True
 
     def is_perfect(self) -> bool:
         """
-        TODO: Write this implementation
+        Determines whether BST is perfect
         """
-        return True
+        # handle case where BST is empty
+        if self.root is None:
+            return True
+
+        # iterate through BST while testing for perfect property
+        height = self.height()
+        return self.is_perfect_helper(self.root, 0, height)
+
+    def is_perfect_helper(self, node: object, iter: int, iter_limit: int) -> bool:
+        """
+        Recursive helper function for is_perfect()
+        """
+        # handle base case where iteration limit reached without returning false
+        if iter == iter_limit:
+            return True
+
+        # handle base case where node with < 2 children found
+        if node.left is None or node.right is None:
+            return False
+
+        # handle recursive case where node has 2 children
+        return self.is_perfect_helper(node.left, iter + 1, iter_limit) and self.is_perfect_helper(node.right, iter + 1,
+                                                                                                  iter_limit)
 
     def size(self) -> int:
         """
-        TODO: Write this implementation
+        Returns the number of TreeNodes in BST
         """
-        return 0
+        # handles case where BST is empty
+        if self.root is None:
+            return 0
+
+        # call recursive helper function to count distinct nodes
+        return self.size_helper(self.root)
+
+    def size_helper(self, node: object) -> int:
+        """
+        Recursive helper function for size()
+        """
+        # process current node
+        count = 1
+
+        # recursively call size_helper() on left subtree of current node
+        if node.left is not None:
+            count += self.size_helper(node.left)
+
+        # recursively call size_helper() on right subtree of current node
+        if node.right is not None:
+            count += self.size_helper(node.right)
+
+        return count
 
     def height(self) -> int:
         """
-        TODO: Write this implementation
+        Returns height of BST
         """
-        return -1
+        # handle case where BST is empty
+        if self.root is None:
+            return -1
+
+        # call recursive helper function to count max number of traversals to leaf in BST
+        return self.height_helper(self.root)
+
+    def height_helper(self, node: object) -> int:
+        """
+        Recursive helper function for height()
+        """
+        # handle base case where current node is a leaf
+        if self.is_leaf(node):
+            return 0
+
+        # handle recursive case where current node has a single child
+        if node.left is not None and node.right is None:
+            return 1 + self.height_helper(node.left)
+        if node.left is None and node.right is not None:
+            return 1 + self.height_helper(node.right)
+
+        # handle case where node has two children
+        if self.height_helper(node.left) > self.height_helper(node.right):
+            return 1 + self.height_helper(node.left)
+        else:
+            return 1 + self.height_helper(node.right)
 
     def count_leaves(self) -> int:
         """
-        TODO: Write this implementation
+        Counts number of nodes in BST that have no children
         """
-        return 0
+        # handle case where BST is empty
+        if self.root is None:
+            return 0
+
+        # call recursive helper function to count total leaves
+        return self.count_leaves_helper(self.root)
+
+    def count_leaves_helper(self, node: object) -> int:
+        """
+        Recursive helper function for count_leaves()
+        """
+        # handle base case where current node is a leaf
+        if self.is_leaf(node):
+            return 1
+
+        # handle recursive case where current node has single child
+        if node.left is not None and node.right is None:
+            return self.count_leaves_helper(node.left)
+        if node.left is None and node.right is not None:
+            return self.count_leaves_helper(node.right)
+
+        # handle recursive case where current node has two children
+        return self.count_leaves_helper(node.left) + self.count_leaves_helper(node.right)
 
     def count_unique(self) -> int:
         """
-        TODO: Write this implementation
+        Counts number of nodes with unique values
         """
-        return 0
+        # handle case where BST is empty
+        if self.root is None:
+            return 0
+
+        # call recursive helper function to count unique values
+        q = Queue()
+        return self.count_unique_helper(self.root, q)
+
+    def count_unique_helper(self, node: object, q: object) -> int:
+        """
+        Recursive helper function for count_unique()
+        """
+        # iterate through q to determine whether node.value exists within q
+        temp_q = Queue()
+        new_value = True
+        while not q.is_empty() and new_value:
+            current_node = q.dequeue()
+            temp_q.enqueue(current_node)
+            if node.value == current_node.value:
+                new_value = False
+
+        # enqueue nodes from temp_q back into q
+        while not temp_q.is_empty():
+            current_node = temp_q.dequeue()
+            q.enqueue(current_node)
+
+        # assign integer indication of whether current node had new value to convenient variable
+        current_add = 0
+        if new_value:
+            q.enqueue(node)
+            current_add = 1
+
+        # handle base case where current node is leaf
+        if self.is_leaf(node):
+            return current_add
+
+        # handle recursive case where current node has a single child
+        if node.left is not None and node.right is None:
+            return current_add + self.count_unique_helper(node.left, q)
+        if node.left is None and node.right is not None:
+            return current_add + self.count_unique_helper(node.right, q)
+
+        # handle case where current node has two children
+        return current_add + self.count_unique_helper(node.left, q) + self.count_unique_helper(node.right, q)
+
+    def is_root(self, node: object) -> bool:
+        """
+        Indicates whether TreeNode passed as argument is root
+        """
+        if node == self.root:
+            return True
+        else:
+            return False
+
+    def is_leaf(self, node: object) -> bool:
+        """
+        Indicates whether TreeNode passed as argument is a leaf
+        """
+        if node.left is None and node.right is None:
+            return True
+        else:
+            return False
 
 
 # BASIC TESTING - PDF EXAMPLES
